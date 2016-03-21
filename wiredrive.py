@@ -10,10 +10,7 @@ from resources import AssetCreditAssociationResource
 from resources import CreditAssetAssociationResource
 
 #TODO return id of created objects
-#TODO make sure the formatted json returned is still json
-# what is with returning the weird null ones
 # deploy/install/tests/documentation
-# github
 
 def build_endpoints(api):
     '''
