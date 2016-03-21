@@ -14,7 +14,6 @@ from database import db
 
 
 
-#potentially casscading deletes
 asset_credit_table = db.Table('AssetCredit',
                               db.Column('asset_id', db.Integer,
                                         db.ForeignKey('asset.identifier')),

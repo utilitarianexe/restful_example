@@ -40,7 +40,7 @@ class CreditResource(Resource):
         args = self.post_reqparse.parse_args()
         credit = Credit(args['job_type'], args['name'])
         # todo not putting location in header
-        return credit, 201
+        return credit, 201, {'location': '/asset/' + str(credit.identifier)}
 
     @marshal_with(credit_resource_fields)
     def put(self, credit_id):
@@ -83,7 +83,7 @@ class AssetResource(Resource):
         args = self.post_reqparse.parse_args()
         asset = Asset(args['title'], args['description'], args['thumbnail_url'])
         # todo not putting location in header
-        return asset, 201
+        return asset, 201, {'location': '/asset/' + str(asset.identifier)}
 
     @marshal_with(asset_resource_fields)
     def put(self, asset_id):

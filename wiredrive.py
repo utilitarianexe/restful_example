@@ -9,7 +9,7 @@ from resources import CreditResource
 from resources import AssetCreditAssociationResource
 from resources import CreditAssetAssociationResource
 
-#TODO return id of created objects
+# TODO return id of created objects
 # deploy/install/tests/documentation
 
 def build_endpoints(api):
@@ -29,7 +29,6 @@ def build_endpoints(api):
                      '/asset/<int:asset_id>/credit/<int:credit_id>')
     
     api.add_resource(CreditAssetAssociationResource, '/credit/<int:credit_id>/assets')
-
 
 
 def setup_flask(drop_all=False):
