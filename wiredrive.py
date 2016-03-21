@@ -6,6 +6,7 @@ from database import db
 from resources import AssetResource
 from resources import AssetCollectionResource
 from resources import CreditResource
+from resources import CreditCollectionResource
 from resources import AssetCreditAssociationResource
 from resources import CreditAssetAssociationResource
 
@@ -25,16 +26,18 @@ def build_endpoints(api):
     endpoints are created by the meathods of the classes in
     resources.py
     '''
-    api.add_resource(AssetResource, '/asset/<int:asset_id>', '/asset')
-    api.add_resource(AssetCollectionResource, '/asset/')
+    api.add_resource(AssetResource, '/assets/<int:asset_id>')
+    api.add_resource(AssetCollectionResource, '/assets')
 
-    api.add_resource(CreditResource, '/crebdit/<int:credit_id>', '/credit')
+    api.add_resource(CreditResource, '/credits/<int:credit_id>')
+    api.add_resource(CreditCollectionResource, '/credits')
+
     api.add_resource(AssetCreditAssociationResource,
-                     '/asset/<int:asset_id>/credits',
-                     '/asset/<int:asset_id>/credit/<int:credit_id>')
+                     '/assets/<int:asset_id>/credits',
+                     '/assets/<int:asset_id>/credits/<int:credit_id>')
 
     api.add_resource(CreditAssetAssociationResource,
-                     '/credit/<int:credit_id>/assets')
+                     '/credits/<int:credit_id>/assets')
 
 
 def setup_flask(drop_all=False):
@@ -59,7 +62,7 @@ def setup_flask(drop_all=False):
     return app, api
 
 
-app, api = setup_flask(drop_all=False)
+app, api = setup_flask(drop_all=True)
 
 
 if __name__ == '__main__':

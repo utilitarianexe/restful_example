@@ -26,67 +26,13 @@ asset_resource_fields = {'title': fields.String,
                          'creation_date': fields.DateTime(dt_format='rfc822'), }
 
 
-class CreditResource(Resource):
-    def __init__(self):
-        self.post_reqparse = reqparse.RequestParser()
-        self.post_reqparse.add_argument('name', required=True)
-        self.post_reqparse.add_argument('job_type', required=True)
-        self.put_reqparse = reqparse.RequestParser()
-        self.put_reqparse.add_argument('name')
-        self.put_reqparse.add_argument('job_type')
-
-    @marshal_with(credit_resource_fields)
-    def post(self):
-        args = self.post_reqparse.parse_args()
-        credit = Credit(args['job_type'], args['name'])
-        # todo not putting location in header
-        return credit, 201, {'location': '/asset/' + str(credit.identifier)}
-
-    @marshal_with(credit_resource_fields)
-    def put(self, credit_id):
-        args = self.put_reqparse.parse_args()
-        credit = Credit.query.filter_by(identifier=credit_id).first()
-        if credit is None:
-            credit = Credit(args['name'], args['job_type'])
-            # todo not putting location in header
-            return credit, 201
-        credit.update(args['name'], args['job_type'])
-        return credit, 200
-
-    def delete(self, credit_id):
-        credit = Credit.query.filter_by(identifier=credit_id).first()
-        if credit is None:
-            return '', 404
-        credit.delete()
-        return '', 204
-
-    @marshal_with(credit_resource_fields)
-    def get(self, credit_id):
-        credit = Credit.query.filter_by(identifier=credit_id).first()
-        return credit, 200
-
-
 class AssetResource(Resource):
     def __init__(self):
-        self.post_reqparse = reqparse.RequestParser()
         self.put_reqparse = reqparse.RequestParser()
-        self.post_reqparse.add_argument('title', required=True)
-        self.post_reqparse.add_argument('description', required=True)
-        # TODO validate
-        self.post_reqparse.add_argument('thumbnail_url', required=True)
         self.put_reqparse.add_argument('title')
         self.put_reqparse.add_argument('description')
         # TODO validate
         self.put_reqparse.add_argument('thumbnail_url')
-
-    @marshal_with(asset_resource_fields)
-    def post(self):
-        args = self.post_reqparse.parse_args()
-        asset = Asset(args['title'],
-                      args['description'],
-                      args['thumbnail_url'])
-        header = {'location': '/asset/' + str(asset.identifier)}
-        return asset, 201, header
 
     @marshal_with(asset_resource_fields)
     def put(self, asset_id):
@@ -96,7 +42,7 @@ class AssetResource(Resource):
             asset = Asset(args['title'],
                           args['description'],
                           args['thumbnail_url'])
-            header = {'location': '/asset/' + str(asset.identifier)}
+            header = {'location': '/assets/' + str(asset.identifier)}
             return asset, 201, header
         asset.update(args['title'], args['description'], args['thumbnail_url'])
         return asset, 200
@@ -122,11 +68,27 @@ class AssetCollectionResource(Resource):
     '''
 
     def __init__(self):
+        self.post_reqparse = reqparse.RequestParser()
         self.get_reqparse = reqparse.RequestParser()
         # TODO force to int
         self.get_reqparse.add_argument('number')
         # TODO force one of the two types
         self.get_reqparse.add_argument('sort')
+        self.post_reqparse.add_argument('title', required=True)
+        self.post_reqparse.add_argument('description', required=True)
+        # TODO validate
+        self.post_reqparse.add_argument('thumbnail_url', required=True)
+
+
+    @marshal_with(asset_resource_fields)
+    def post(self):
+        args = self.post_reqparse.parse_args()
+        asset = Asset(args['title'],
+                      args['description'],
+                      args['thumbnail_url'])
+        header = {'location': '/assets/' + str(asset.identifier)}
+        return asset, 201, header
+
 
     @marshal_with(asset_resource_fields)
     def get(self):
@@ -137,7 +99,6 @@ class AssetCollectionResource(Resource):
             if sort_type == 'reverse':
                 asset_query = asset_query.order_by(desc(text("title")))
             else:
-                print('sort normal')
                 asset_query = asset_query.order_by(text("title"))
         if args['number'] is not None:
             number = args['number']
@@ -145,6 +106,78 @@ class AssetCollectionResource(Resource):
         else:
             assets = asset_query.all()
         return assets
+
+
+class CreditResource(Resource):
+    def __init__(self):
+        self.put_reqparse = reqparse.RequestParser()
+        self.put_reqparse.add_argument('name')
+        self.put_reqparse.add_argument('job_type')
+
+    @marshal_with(credit_resource_fields)
+    def put(self, credit_id):
+        args = self.put_reqparse.parse_args()
+        credit = Credit.query.filter_by(identifier=credit_id).first()
+        if credit is None:
+            credit = Credit(args['name'], args['job_type'])
+            # todo not putting location in header
+            return credit, 201
+        credit.update(args['name'], args['job_type'])
+        return credit, 200
+
+    def delete(self, credit_id):
+        credit = Credit.query.filter_by(identifier=credit_id).first()
+        if credit is None:
+            return '', 404
+        credit.delete()
+        return '', 204
+
+    @marshal_with(credit_resource_fields)
+    def get(self, credit_id):
+        credit = Credit.query.filter_by(identifier=credit_id).first()
+        return credit, 200
+
+
+class CreditCollectionResource(Resource):
+    '''
+    View for
+    looking at lists of credits
+    and for creating a credit
+    '''
+
+    def __init__(self):
+        self.get_reqparse = reqparse.RequestParser()
+        # TODO force to int
+        self.get_reqparse.add_argument('number')
+        # TODO force one of the two types
+        self.get_reqparse.add_argument('sort')
+        self.post_reqparse = reqparse.RequestParser()
+        self.post_reqparse.add_argument('name', required=True)
+        self.post_reqparse.add_argument('job_type', required=True)
+
+    @marshal_with(credit_resource_fields)
+    def post(self):
+        args = self.post_reqparse.parse_args()
+        credit = Credit(args['job_type'], args['name'])
+        # todo not putting location in header
+        return credit, 201, {'location': '/credits/' + str(credit.identifier)}
+
+    @marshal_with(credit_resource_fields)
+    def get(self):
+        args = self.get_reqparse.parse_args()
+        credit_query = Credit.query
+        if args['sort'] is not None:
+            sort_type = args['sort']
+            if sort_type == 'reverse':
+                credit_query = credit_query.order_by(desc(text("name")))
+            else:
+                credit_query = credit_query.order_by(text("name"))
+        if args['number'] is not None:
+            number = args['number']
+            credits = credit_query.limit(int(number)).all()
+        else:
+            credits = credit_query.all()
+        return credits
 
 
 class AssetCreditAssociationResource(Resource):
