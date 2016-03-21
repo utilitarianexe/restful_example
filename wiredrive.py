@@ -9,8 +9,12 @@ from resources import CreditResource
 from resources import AssetCreditAssociationResource
 from resources import CreditAssetAssociationResource
 
-# TODO return id of created objects
+# TODOs
 # deploy/install/tests/documentation
+# drop tables for tests?
+# frontend?
+# find all the in code todos
+
 
 def build_endpoints(api):
     '''
@@ -25,10 +29,12 @@ def build_endpoints(api):
     api.add_resource(AssetCollectionResource, '/asset/')
 
     api.add_resource(CreditResource, '/crebdit/<int:credit_id>', '/credit')
-    api.add_resource(AssetCreditAssociationResource, '/asset/<int:asset_id>/credits',
+    api.add_resource(AssetCreditAssociationResource,
+                     '/asset/<int:asset_id>/credits',
                      '/asset/<int:asset_id>/credit/<int:credit_id>')
-    
-    api.add_resource(CreditAssetAssociationResource, '/credit/<int:credit_id>/assets')
+
+    api.add_resource(CreditAssetAssociationResource,
+                     '/credit/<int:credit_id>/assets')
 
 
 def setup_flask(drop_all=False):
@@ -41,8 +47,6 @@ def setup_flask(drop_all=False):
     # TODO error handling
     app = Flask(__name__)
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
-    #db = SQLAlchemy(app)
-    #app.config.from_object('config')
     db.init_app(app)
     with app.app_context():
         # Extensions like Flask-SQLAlchemy now know what the "current" app
@@ -54,7 +58,9 @@ def setup_flask(drop_all=False):
     build_endpoints(api)
     return app, api
 
+
 app, api = setup_flask(drop_all=False)
+
 
 if __name__ == '__main__':
     # debug will only be true if launched by running this file

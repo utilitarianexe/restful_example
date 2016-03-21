@@ -17,13 +17,13 @@ from models import insert_credit_asset_association
 
 
 credit_resource_fields = {'job_type': fields.String,
-                          'name': fields.String,}
+                          'name': fields.String, }
 
 
 asset_resource_fields = {'title': fields.String,
                          'description': fields.String,
                          'thumbnail_url': fields.String,
-                         'creation_date': fields.DateTime(dt_format='rfc822'),}
+                         'creation_date': fields.DateTime(dt_format='rfc822'), }
 
 
 class CreditResource(Resource):
@@ -61,7 +61,7 @@ class CreditResource(Resource):
         return '', 204
 
     @marshal_with(credit_resource_fields)
-    def get(self,credit_id):
+    def get(self, credit_id):
         credit = Credit.query.filter_by(identifier=credit_id).first()
         return credit, 200
 
@@ -72,27 +72,32 @@ class AssetResource(Resource):
         self.put_reqparse = reqparse.RequestParser()
         self.post_reqparse.add_argument('title', required=True)
         self.post_reqparse.add_argument('description', required=True)
-        self.post_reqparse.add_argument('thumbnail_url', required=True) #TODO validate
+        # TODO validate
+        self.post_reqparse.add_argument('thumbnail_url', required=True)
         self.put_reqparse.add_argument('title')
         self.put_reqparse.add_argument('description')
-        self.put_reqparse.add_argument('thumbnail_url') #TODO validate
-
+        # TODO validate
+        self.put_reqparse.add_argument('thumbnail_url')
 
     @marshal_with(asset_resource_fields)
     def post(self):
         args = self.post_reqparse.parse_args()
-        asset = Asset(args['title'], args['description'], args['thumbnail_url'])
-        # todo not putting location in header
-        return asset, 201, {'location': '/asset/' + str(asset.identifier)}
+        asset = Asset(args['title'],
+                      args['description'],
+                      args['thumbnail_url'])
+        header = {'location': '/asset/' + str(asset.identifier)}
+        return asset, 201, header
 
     @marshal_with(asset_resource_fields)
     def put(self, asset_id):
         args = self.put_reqparse.parse_args()
         asset = Asset.query.filter_by(identifier=asset_id).first()
         if asset is None:
-            asset = Asset(args['title'], args['description'], args['thumbnail_url'])
-            # todo not putting location in header
-            return asset, 201
+            asset = Asset(args['title'],
+                          args['description'],
+                          args['thumbnail_url'])
+            header = {'location': '/asset/' + str(asset.identifier)}
+            return asset, 201, header
         asset.update(args['title'], args['description'], args['thumbnail_url'])
         return asset, 200
 
@@ -118,8 +123,10 @@ class AssetCollectionResource(Resource):
 
     def __init__(self):
         self.get_reqparse = reqparse.RequestParser()
-        self.get_reqparse.add_argument('number') #force to int
-        self.get_reqparse.add_argument('sort') # force one of the two types
+        # TODO force to int
+        self.get_reqparse.add_argument('number')
+        # TODO force one of the two types
+        self.get_reqparse.add_argument('sort')
 
     @marshal_with(asset_resource_fields)
     def get(self):
@@ -141,8 +148,6 @@ class AssetCollectionResource(Resource):
 
 
 class AssetCreditAssociationResource(Resource):
-    resource_fields = {'job_type': fields.String,
-                       'name': fields.String,}
 
     def __init__(self):
         pass
@@ -162,7 +167,6 @@ class AssetCreditAssociationResource(Resource):
         if error is not None:
             return error, 400
         return '', 201
-
 
 
 class CreditAssetAssociationResource(Resource):

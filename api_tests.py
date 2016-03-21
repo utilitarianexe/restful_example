@@ -47,7 +47,8 @@ def check_response(response, status_code,
 def generic_get(path, data=None):
     url = host + path
     response = requests.get(url, data=data)
-    print_response(response)
+    return response
+
 
 def generic_delete(path):
     url = host + path
@@ -117,18 +118,43 @@ def get_asset_test(asset_location):
                    keys_to_ignore=['creation_date'])
 
 def delete_asset_test(asset_location):
-    pass
+    response = requests.delete(asset_location)
+    check_response(response, 204)
 
+def get_assets_tests():
+    expected_content = [{'title': 'apple',
+                         'description': 'apple',
+                         'thumbnail_url': 'apple',},
+                        {'title': 'bannana',
+                         'description': 'apple',
+                         'thumbnail_url': 'apple',},
+                        {'title': 'orange',
+                         'description': 'apple',
+                         'thumbnail_url': 'apple',},
+                        {'title': 'peter',
+                         'description': 'peter',
+                         'thumbnail_url': 'apple',},
+                    ]
 
-def delete_asset():
-    path = '/asset/15'
-    generic_delete(path)
-
-def get_assets():
     path = '/asset/'
-    data = {'number': 3, 'sort': 'standard'}
-    #data = None
-    generic_get(path, data=data)
+    data = {}
+    response = generic_get(path, data=data)
+    check_response(response, 200, expected_content=expected_content,
+                   keys_to_ignore=['creation_date'])
+    
+    data = {'sort': 'reverse'}
+    expected_content = list(reversed(expected_content))
+    response = generic_get(path, data=data)
+    check_response(response, 200, expected_content=expected_content,
+                   keys_to_ignore=['creation_date'])
+
+    data = {'sort': 'standard', 'number': 3}
+    expected_content = list(reversed(expected_content))[:3]
+    response = generic_get(path, data=data)
+    check_response(response, 200, expected_content=expected_content,
+                   keys_to_ignore=['creation_date'])
+
+
 
 def create_credit():
     path = '/credit'
@@ -180,7 +206,7 @@ def test_api():
     update_existing_asset_test(example_asset_location)
     get_asset_test(example_asset_location)
     delete_asset_test(example_asset_location)
-    get_asssets_tests()
+    get_assets_tests()
 
 test_api()
 
